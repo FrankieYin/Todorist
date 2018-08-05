@@ -3,24 +3,18 @@ package main
 import (
 	"os"
 	"fmt"
-	"io/ioutil"
-	"log"
 
 	"github.com/FrankieYin/Todorist/internal/app"
-	"github.com/mitchellh/go-homedir"
 )
 
 func main() {
-	filename := fmt.Sprintf("%s/.todo/todo.json", homedir.Dir())
-	b := loadFile(filename)
-
 	args := os.Args
 
 	if len(args) <= 1 { // command invoked without a directory
 		printUsage()
 		os.Exit(1)
 	} else {
-		loadTodo(b)
+		app.Init()
 		execute(args[1:])
 	}
 }
@@ -45,26 +39,4 @@ func execute(args []string) {
 
 func printUsage() {
 	fmt.Println("Thanks for using Todorist!")
-}
-
-func initialise() {
-
-}
-
-func loadFile(filename string) []byte {
-	b, err := ioutil.ReadFile(filename)
-	if err != nil { // this will happen only when the command is called for the first time
-		switch {
-		case os.IsNotExist(err):
-			initialise()
-			return loadFile(filename)
-		case os.IsPermission(err):
-			log.Fatal("file read permission denied.")
-		}
-	}
-	return b
-}
-
-func loadTodo(b []byte) {
-
 }
