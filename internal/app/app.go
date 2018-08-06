@@ -4,26 +4,31 @@ import (
 	"fmt"
 	"os"
 	"log"
-	"io/ioutil"
+		"bufio"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/FrankieYin/Todorist/internal/util"
+	"encoding/json"
 )
 
-var HOME string
-var JsonFilename string
+var home string
+var jsonFilename string
+var todoList []*todoItem
 
 func Init() {
 	var err error
-	HOME, err = homedir.Dir()
+	home, err = homedir.Dir()
 	util.CheckErr(err, "")
 
-	JsonFilename = fmt.Sprintf("%s/.todo/todo.json", HOME)
-	loadTodo(loadFile(JsonFilename))
+	jsonFilename = fmt.Sprintf("%s/.todo/todo", home)
+	todoList = loadTodo()
 }
 
 func HandleList(input []string) {
-	fmt.Println("todo called with directory list")
+	fmt.Println("All")
+	for _, pTodo := range todoList {
+		fmt.Printf("[ ]\t%s\n", pTodo.Task)
+	}
 }
 
 /**
@@ -50,34 +55,46 @@ func HandleProject(input []string)  {
 }
 
 /**
- loads the json file
+ loads the json string into memory
  */
-func loadFile(filename string) []byte {
-	b, err := ioutil.ReadFile(filename)
-	if err != nil { // this will happen only when the command is called for the first time
+func loadTodo() []*todoItem {
+	f, err := os.OpenFile(jsonFilename, os.O_RDONLY, 0444)
+	if err != nil {
 		switch {
 		case os.IsNotExist(err):
 			// create the directory
-			dir := fmt.Sprintf("%s/.todo/", HOME)
+			dir := fmt.Sprintf("%s/.todo/", home)
 			err = os.Mkdir(dir, 0777)
-			util.CheckErr(err, "")
+			util.CheckErr(err, "Error creating directory /.todo")
 
-			// initialise an empty todo.json file
-			f, err := os.Create(filename)
+			// initialise an empty json file
+			f, err := os.Create(jsonFilename)
 			util.CheckErr(err, "failed to create json file")
 
 			defer f.Close()
 
-			return loadFile(filename)
+			return loadTodo()
 		case os.IsPermission(err):
 			log.Fatal("file read permission denied.")
 		}
 	}
-	return b
-}
 
-/**
- loads the json string into memory
- */
-func loadTodo(b []byte) {
+	defer f.Close()
+
+	var pTodo *todoItem
+	var todoList = make([]*todoItem, 0)
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		pTodo = new(todoItem)
+		jsonString := scanner.Text()
+		err = json.Unmarshal([]byte(jsonString), pTodo)
+
+		util.CheckErr(err, "")
+
+		todoList = append(todoList, pTodo)
+	}
+	util.CheckErr(scanner.Err(), "An error occurred during scanning json file")
+
+	return todoList
 }

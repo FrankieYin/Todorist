@@ -1,7 +1,9 @@
 package app
 
-import "strings"
+import (
+	"strings"
+)
 
 func parse(input []string) *todoItem {
-	return &todoItem{Task:strings.Join(input, " ")}
+	return &todoItem{Task: strings.Join(input, " ")}
 }
