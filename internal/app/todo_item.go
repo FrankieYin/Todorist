@@ -14,7 +14,7 @@ type todoItem struct {
 	Project string `json:"project"`
 	TimeCreated string `json:"time_created"`
 	Done bool `json:"done"`
-	Id int `json:"id"`
+	Id int `json:"id"`	// does not change throughout the life time of the task
 }
 
 func newTodoItem() {

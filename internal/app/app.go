@@ -25,9 +25,16 @@ func Init() {
 }
 
 func HandleList(input []string) {
+
+	if len(todoList) == 0 {
+		fmt.Println("No task left undone!")
+		fmt.Println("Use 'todo add' to add a new task.")
+		os.Exit(0)
+	}
+
 	fmt.Println("All")
 	for _, pTodo := range todoList {
-		fmt.Printf("[ ]\t%s\n", pTodo.Task)
+		fmt.Printf("%d\t[ ]\t%s\n", pTodo.Id, pTodo.Task)
 	}
 }
 
@@ -47,7 +54,7 @@ func HandleAdd(input []string)  {
 }
 
 func HandleDone(input []string)  {
-	fmt.Println("todo called with directory done")
+
 }
 
 func HandleProject(input []string)  {
