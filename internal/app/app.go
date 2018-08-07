@@ -55,7 +55,53 @@ func execute(args []string) {
 		save()
 	case "project":
 		handleProject(input)
+	case "del":
+		handleDel(input)
+		save()
 	}
+}
+
+/**
+ delete the task(s) specified by the ids. If any of the id is invalid, no task will be deleted.
+ */
+func handleDel(input []string) {
+	n := len(input)
+	if n == 0 {
+		fmt.Println("No task Id specified, no task deleted.")
+		fmt.Println("try 'todo help del' to see examples on how to delete a task")
+		os.Exit(0)
+	}
+
+	var ids = make([]int, n)
+	numId := 0
+
+	for _, idString := range input {
+		// check if all input ids are valid
+		id, err := strconv.Atoi(idString)
+		util.CheckErr(err, "")
+
+		if _, ok := todoList[id]; ok {
+			ids[numId] = id
+			numId++
+		} else{
+			fmt.Printf("todo del error: found no task with id %d\n", id)
+			os.Exit(0)
+		}
+
+		// ids are valid; delete from todoList map and from todoOrder slice
+		for _, id = range ids {
+			delete(todoList, id)
+			for i, v := range todoOrder {
+				if v == id {
+					todoOrder = append(todoOrder[:i], todoOrder[i+1:]...)
+				}
+			}
+		}
+	}
+
+	msg := "task"
+	if n > 1 {msg = "tasks"}
+	fmt.Printf("Deleted %d %s\n", n, msg)
 }
 
 func handleList(input []string) {
