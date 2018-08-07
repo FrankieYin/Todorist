@@ -17,11 +17,17 @@ func assignId() int {
 		return 1
 	}
 
-	id := 1
+	ids := make(map[int]bool)
 	for k := range todoList {
-		if id == k {
-			id++
+		ids[k] = true
+	}
+
+	var i int
+	for i = range todoOrder {
+		_, ok := ids[i+1]
+		if !ok {
+			return i+1
 		}
 	}
-	return id
+	return i+2
 }
