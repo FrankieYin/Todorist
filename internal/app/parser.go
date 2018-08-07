@@ -18,8 +18,8 @@ func assignId() int {
 	}
 
 	id := 1
-	for _, pTodo := range todoList {
-		if id == pTodo.Id {
+	for k := range todoList {
+		if id == k {
 			id++
 		}
 	}

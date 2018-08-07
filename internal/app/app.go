@@ -3,28 +3,62 @@ package app
 import (
 	"fmt"
 	"os"
-	"log"
-		"bufio"
+	"encoding/json"
+	"strconv"
+	"io/ioutil"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/FrankieYin/Todorist/internal/util"
-	"encoding/json"
 )
 
 var home string
-var jsonFilename string
-var todoList []*todoItem
+var todoJsonFilename string
+var orderJsonFilename string
+var todoDir string
 
-func Init() {
+var todoList map[int]*todoItem
+var todoOrder []int
+
+func Run(args []string) {
+	initApp()
+	execute(args)
+}
+
+func initApp() {
 	var err error
 	home, err = homedir.Dir()
 	util.CheckErr(err, "")
 
-	jsonFilename = fmt.Sprintf("%s/.todo/todo", home)
+	todoJsonFilename = fmt.Sprintf("%s/.todo/todo", home)
+	orderJsonFilename = fmt.Sprintf("%s/.todo/order", home)
+	todoDir = fmt.Sprintf("%s/.todo/", home)
+
+	initTodoEnv()
 	todoList = loadTodo()
+	todoOrder = loadTodoOrder()
 }
 
-func HandleList(input []string) {
+func execute(args []string) {
+	command := args[0] // len(args) is guaranteed to be >= 1
+	input := args[1:]
+	// the above line will not give Out Of Bounds error because
+	// we're slicing a slice and the bounds are 0 <= low <= high <= cap()
+
+	switch command {
+	case "list":
+		handleList(input)
+	case "add":
+		handleAdd(input)
+		save()
+	case "done":
+		handleDone(input)
+		save()
+	case "project":
+		handleProject(input)
+	}
+}
+
+func handleList(input []string) {
 
 	if len(todoList) == 0 {
 		fmt.Println("No task left undone!")
@@ -33,8 +67,13 @@ func HandleList(input []string) {
 	}
 
 	fmt.Println("All")
-	for _, pTodo := range todoList {
-		fmt.Printf("%d\t[ ]\t%s\n", pTodo.Id, pTodo.Task)
+	for _, v := range todoOrder {
+		pTodo, ok := todoList[v]
+		if ok {
+			done := " "
+			if pTodo.Done {done = "X"}
+			fmt.Printf("%d\t[%s]\t%s\n", pTodo.Id, done, pTodo.Task)
+		}
 	}
 }
 
@@ -42,7 +81,7 @@ func HandleList(input []string) {
  usage:
  add finish todorist add functionality due today
  */
-func HandleAdd(input []string)  {
+func handleAdd(input []string)  {
 	if len(input) == 0 { // add cannot be called without an argument
 		fmt.Println("No task specified, no task added.")
 		fmt.Println("try 'todo help add' to see examples on how to add a task")
@@ -50,58 +89,111 @@ func HandleAdd(input []string)  {
 	}
 
 	pTodoItem := parse(input)
-	pTodoItem.save()
+	todoList[pTodoItem.Id] = pTodoItem
+	todoOrder = append(todoOrder, pTodoItem.Id)
 }
 
-func HandleDone(input []string)  {
+func handleDone(input []string)  {
+	n := len(input)
+	if n == 0 {
+		fmt.Println("No task Id specified, no task completed.")
+		fmt.Println("try 'todo help done' to see examples on how to complete a task")
+		os.Exit(0)
+	}
 
+	for _, idString := range input {
+		id, err := strconv.Atoi(idString)
+		util.CheckErr(err, "")
+		pTodo, ok := todoList[id]
+		if ok {
+			pTodo.Done = true
+		} else {
+			fmt.Printf("todo done error: found no task with id %d\n", id)
+			fmt.Println("Use 'todo list' first before completing a task")
+			os.Exit(0)
+		}
+	}
+	msg := "task"
+	if n > 1 {msg = "tasks"}
+	fmt.Printf("Completed %d %s\n", n, msg)
 }
 
-func HandleProject(input []string)  {
+func handleProject(input []string)  {
 	fmt.Println("todo called with directory project")
+}
+
+func save() {
+	// save todolist
+	b, err := json.Marshal(todoList)
+	util.CheckErr(err, "Unable to Marshal todolist")
+
+	fTodo, err := os.OpenFile(todoJsonFilename, os.O_WRONLY|os.O_TRUNC, 0644)
+	util.CheckErr(err, "Error opening todo json file")
+
+	defer fTodo.Close()
+
+	_, err = fTodo.Write(b)
+	util.CheckErr(err, "Error writing todo json file")
+
+	// save order list
+	b, err = json.Marshal(todoOrder)
+	util.CheckErr(err, "Unable to Marshal todo order list")
+
+	fOrder, err := os.OpenFile(orderJsonFilename, os.O_WRONLY|os.O_TRUNC, 0644)
+	util.CheckErr(err, "Error opening order json file")
+
+	defer fOrder.Close()
+
+	_, err = fOrder.Write(b)
+	util.CheckErr(err, "Error writing order json file")
+}
+
+func initTodoEnv() {
+	if _, err := os.Stat(todoDir); os.IsNotExist(err) {
+		// create the directory
+		err = os.Mkdir(todoDir, 0777)
+		util.CheckErr(err, "Error creating directory /.todo")
+
+		// initialise empty json files
+		_, err = os.Create(todoJsonFilename)
+		util.CheckErr(err, "failed to create json file")
+
+		_, err = os.Create(orderJsonFilename)
+		util.CheckErr(err, "failed to create json file")
+	}
 }
 
 /**
  loads the json string into memory
  */
-func loadTodo() []*todoItem {
-	f, err := os.OpenFile(jsonFilename, os.O_RDONLY, 0444)
-	if err != nil {
-		switch {
-		case os.IsNotExist(err):
-			// create the directory
-			dir := fmt.Sprintf("%s/.todo/", home)
-			err = os.Mkdir(dir, 0777)
-			util.CheckErr(err, "Error creating directory /.todo")
+func loadTodo() map[int]*todoItem {
+	b, err := ioutil.ReadFile(todoJsonFilename)
+	util.CheckErr(err, "Error reading todo json file")
 
-			// initialise an empty json file
-			f, err := os.Create(jsonFilename)
-			util.CheckErr(err, "failed to create json file")
+	var todoList = make(map[int]*todoItem)
 
-			defer f.Close()
-
-			return loadTodo()
-		case os.IsPermission(err):
-			log.Fatal("file read permission denied.")
-		}
+	if len(b) == 0 { // empty json file
+		return todoList
 	}
 
-	defer f.Close()
-
-	var pTodo *todoItem
-	var todoList = make([]*todoItem, 0)
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		pTodo = new(todoItem)
-		jsonString := scanner.Text()
-		err = json.Unmarshal([]byte(jsonString), pTodo)
-
-		util.CheckErr(err, "")
-
-		todoList = append(todoList, pTodo)
-	}
-	util.CheckErr(scanner.Err(), "An error occurred during scanning json file")
+	err = json.Unmarshal(b, &todoList)
+	util.CheckErr(err, "Error Unmarshalling todo json file")
 
 	return todoList
+}
+
+func loadTodoOrder() []int {
+	b, err := ioutil.ReadFile(orderJsonFilename)
+	util.CheckErr(err, "Error reading todo order json file")
+
+	var todoOrder = make([]int, 0)
+
+	if len(b) == 0 {
+		return todoOrder
+	}
+
+	err = json.Unmarshal(b, &todoOrder)
+	util.CheckErr(err, "Error Unmarshalling order json file")
+
+	return todoOrder
 }
