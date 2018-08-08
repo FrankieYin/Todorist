@@ -2,10 +2,24 @@ package app
 
 import (
 	"strings"
+	"strconv"
+
+	"github.com/FrankieYin/Todorist/internal/data"
+	"github.com/FrankieYin/Todorist/internal/util"
 )
 
-func parse(input []string) *todoItem {
-	return &todoItem{Task: strings.Join(input, " "), Done: false, Id: assignId()}
+func parseTodo(input []string) *data.TodoItem {
+	return &data.TodoItem{Task: strings.Join(input, " "), Id: assignId()}
+}
+
+func parseId(input []string) []int {
+	var ids = make([]int , len(input))
+	for i, idString := range input {
+		id, err := strconv.Atoi(idString)
+		util.CheckErr(err, "")
+		ids[i] = id
+	}
+	return ids
 }
 
 /**
@@ -13,17 +27,17 @@ func parse(input []string) *todoItem {
  */
 func assignId() int {
 
-	if len(todoList) == 0 {
+	if len(todoList.Data) == 0 {
 		return 1
 	}
 
 	ids := make(map[int]bool)
-	for k := range todoList {
+	for k := range todoList.Data {
 		ids[k] = true
 	}
 
 	var i int
-	for i = range todoOrder {
+	for i = range todoList.Order {
 		_, ok := ids[i+1]
 		if !ok {
 			return i+1

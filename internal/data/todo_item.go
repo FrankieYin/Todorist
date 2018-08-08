@@ -1,6 +1,6 @@
-package app
+package data
 
-type todoItem struct {
+type TodoItem struct {
 	Task string `json:"task"`
 	Due string `json:"due"`
 	Project string `json:"project"`
