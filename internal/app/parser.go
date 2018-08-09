@@ -4,8 +4,8 @@ import (
 	"strings"
 	"strconv"
 
-	"github.com/FrankieYin/Todorist/internal/data"
-	"github.com/FrankieYin/Todorist/internal/util"
+	"github.com/FrankieYin/todo/internal/data"
+	"github.com/FrankieYin/todo/internal/util"
 )
 
 func parseTodo(input []string) *data.TodoItem {

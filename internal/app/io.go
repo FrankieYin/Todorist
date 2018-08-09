@@ -6,23 +6,9 @@ import (
 	"os"
 	"io/ioutil"
 
-	"github.com/FrankieYin/Todorist/internal/util"
-	"github.com/FrankieYin/Todorist/internal/data"
+	"github.com/FrankieYin/todo/internal/util"
+	"github.com/FrankieYin/todo/internal/data"
 )
-
-func save(list *data.TodoList, filename string) {
-	// save todolist
-	b, err := json.Marshal(list)
-	util.CheckErr(err, "Unable to Marshal todolist")
-
-	fTodo, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC, 0644)
-	util.CheckErr(err, "Error opening todo json file")
-
-	defer fTodo.Close()
-
-	_, err = fTodo.Write(b)
-	util.CheckErr(err, "Error writing todo json file")
-}
 
 func initTodoEnv() {
 	if _, err := os.Stat(todoDir); os.IsNotExist(err) {
@@ -56,4 +42,20 @@ func loadTodo(filename string) *data.TodoList {
 	util.CheckErr(err, "Error Unmarshalling todo json file")
 
 	return todos
+}
+
+func loadProject(filename string) *data.ProjectList {
+	b, err := ioutil.ReadFile(filename)
+	util.CheckErr(err, "Error reading todo json file")
+
+	var proj = new(data.ProjectList)
+
+	if len(b) == 0 { // empty json file
+		return data.NewProjectList()
+	}
+
+	err = json.Unmarshal(b, proj)
+	util.CheckErr(err, "Error Unmarshalling todo json file")
+
+	return proj
 }

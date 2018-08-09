@@ -3,7 +3,9 @@ package data
 import (
 	"fmt"
 
-	"github.com/FrankieYin/Todorist/internal/util"
+	"github.com/FrankieYin/todo/internal/util"
+	"encoding/json"
+	"os"
 )
 
 type TodoList struct {
@@ -117,4 +119,18 @@ func (l *TodoList) GetTodoById(id int) *TodoItem {
 		return t
 	}
 	return nil
+}
+
+func (l *TodoList) Save(filename string) {
+	// save todolist
+	b, err := json.Marshal(l)
+	util.CheckErr(err, "Unable to Marshal todolist")
+
+	fTodo, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	util.CheckErr(err, "Error opening todo json file")
+
+	defer fTodo.Close()
+
+	_, err = fTodo.Write(b)
+	util.CheckErr(err, "Error writing todo json file")
 }
