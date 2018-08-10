@@ -28,34 +28,32 @@ func initTodoEnv() {
 /**
  loads the json string into memory
  */
-func loadTodo(filename string) *data.TodoList {
+func loadTodo(filename string) (*data.TodoList, error){
 	b, err := ioutil.ReadFile(filename)
-	util.CheckErr(err, "Error reading todo json file")
+	if err != nil {return nil, err}
 
 	var todos = new(data.TodoList)
 
 	if len(b) == 0 { // empty json file
-		return data.NewTodoList()
+		return data.NewTodoList(), nil
 	}
 
-	err = json.Unmarshal(b, todos)
-	util.CheckErr(err, "Error Unmarshalling todo json file")
+	if err = json.Unmarshal(b, todos); err != nil {return nil, err}
 
-	return todos
+	return todos, nil
 }
 
-func loadProject(filename string) *data.ProjectList {
+func loadProject(filename string) (*data.ProjectList, error){
 	b, err := ioutil.ReadFile(filename)
-	util.CheckErr(err, "Error reading todo json file")
+	if err != nil {return nil, err}
 
 	var proj = new(data.ProjectList)
 
 	if len(b) == 0 { // empty json file
-		return data.NewProjectList()
+		return data.NewProjectList(), nil
 	}
 
-	err = json.Unmarshal(b, proj)
-	util.CheckErr(err, "Error Unmarshalling todo json file")
+	if err = json.Unmarshal(b, proj); err != nil {return nil, err}
 
-	return proj
+	return proj, nil
 }

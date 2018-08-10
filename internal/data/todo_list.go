@@ -121,16 +121,18 @@ func (l *TodoList) GetTodoById(id int) *TodoItem {
 	return nil
 }
 
-func (l *TodoList) Save(filename string) {
+func (l *TodoList) Save(filename string) error {
 	// save todolist
-	b, err := json.Marshal(l)
-	util.CheckErr(err, "Unable to Marshal todolist")
+	var b []byte
+	var err error
+	var f *os.File
+	if b, err = json.Marshal(l); err != nil { return err}
 
-	fTodo, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
-	util.CheckErr(err, "Error opening todo json file")
+	if f, err = os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644); err != nil { return err}
 
-	defer fTodo.Close()
+	defer f.Close()
 
-	_, err = fTodo.Write(b)
-	util.CheckErr(err, "Error writing todo json file")
+	if _, err = f.Write(b); err != nil { return err}
+
+	return nil
 }

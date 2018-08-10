@@ -2,8 +2,7 @@ package app
 
 import (
 	"fmt"
-		"github.com/FrankieYin/todo/internal/util"
-)
+		)
 
 type ArchCommand struct {
 }
@@ -18,11 +17,13 @@ func init() {
 }
 
 func (cmd *ArchCommand) Execute(args []string) error {
-	archList = loadTodo(archJsonFilename)
+	var err error
+	archList, err = loadTodo(archJsonFilename)
+	if err != nil {return err}
 
 	ids := parseId(args)
 	archived, err := todoList.ArchTodo(len(archList.Data), ids...)
-	util.CheckErr(err, "")
+	if err != nil {return err}
 	archList.Merge(archived)
 
 	msg := "task"
@@ -30,7 +31,8 @@ func (cmd *ArchCommand) Execute(args []string) error {
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("Archived %d %s\n", n, msg)
 
-	todoList.Save(todoJsonFilename)
-	archList.Save(archJsonFilename)
+	if err = todoList.Save(todoJsonFilename); err != nil { return err }
+	if err = archList.Save(archJsonFilename); err != nil { return err }
+
 	return nil
 }

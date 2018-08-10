@@ -18,8 +18,9 @@ func init() {
 }
 
 func (cmd *ProjCommand) Execute(args []string) error {
-
-	projList = loadProject(projJsonFilename)
+	var err error
+	projList, err = loadProject(projJsonFilename)
+	if err != nil {return err}
 
 	n := len(args)
 	if n == 0 { // list existing projects

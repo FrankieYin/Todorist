@@ -1,8 +1,7 @@
 package app
 
 import (
-	"github.com/FrankieYin/todo/internal/util"
-	"fmt"
+		"fmt"
 	"os"
 )
 
@@ -28,13 +27,11 @@ func (cmd *DelCommand) Execute(args []string) error {
 
 	ids := parseId(args)
 
-	err := todoList.DeleteTodo(ids...)
-	util.CheckErr(err, "")
+	if err := todoList.DeleteTodo(ids...); err != nil { return err}
 
 	msg := "task"
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("Deleted %d %s\n", n, msg)
 
-	todoList.Save(todoJsonFilename)
-	return nil
+	return todoList.Save(todoJsonFilename)
 }

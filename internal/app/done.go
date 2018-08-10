@@ -3,8 +3,7 @@ package app
 import (
 	"fmt"
 	"os"
-	"github.com/FrankieYin/todo/internal/util"
-)
+	)
 
 type DoneCommand struct {
 	All bool `long:"all" description:"Complete all todos under the current focus."`
@@ -30,13 +29,11 @@ func (cmd *DoneCommand) Execute(args []string) error {
 
 	ids := parseId(args)
 
-	err := todoList.DoneTodo(ids...)
-	util.CheckErr(err, "")
+	if err := todoList.DoneTodo(ids...); err != nil {return err}
 
 	msg := "task"
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("Completed %d %s\n", n, msg)
 
-	todoList.Save(todoJsonFilename)
-	return nil
+	return todoList.Save(todoJsonFilename)
 }

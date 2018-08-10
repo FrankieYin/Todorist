@@ -33,7 +33,8 @@ func init() {
 	archJsonFilename = fmt.Sprintf("%sarchive", todoDir)
 
 	initTodoEnv()
-	todoList = loadTodo(todoJsonFilename)
+	todoList, err = loadTodo(todoJsonFilename)
+	util.CheckErr(err, "")
 }
 
 func Run() {

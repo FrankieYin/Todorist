@@ -27,7 +27,5 @@ func (cmd *AddCommand) Execute(args []string) error {
 
 	pTodoItem := parseTodo(args)
 	todoList.AddTodo(pTodoItem)
-	todoList.Save(todoJsonFilename)
-
-	return nil
+	return todoList.Save(todoJsonFilename)
 }
