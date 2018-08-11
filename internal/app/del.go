@@ -33,5 +33,5 @@ func (cmd *DelCommand) Execute(args []string) error {
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("Deleted %d %s\n", n, msg)
 
-	return todoList.Save(todoJsonFilename)
+	return save(todoList, todoJsonFilename)
 }

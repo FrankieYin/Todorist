@@ -20,7 +20,7 @@ func init() {
 
 func (cmd *LsCommand) Execute(args []string) error {
 	if len(todoList.Data) == 0 {
-		fmt.Println("No task left undone!")
+		fmt.Println("No todo left undone!")
 		fmt.Println("Use 'todo add' to add a new task.")
 		os.Exit(0)
 	}

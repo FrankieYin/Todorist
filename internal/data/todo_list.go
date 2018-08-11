@@ -2,10 +2,7 @@ package data
 
 import (
 	"fmt"
-
-	"github.com/FrankieYin/todo/internal/util"
-	"encoding/json"
-	"os"
+			"github.com/FrankieYin/todo/internal/util"
 )
 
 type TodoList struct {
@@ -73,11 +70,11 @@ func (l *TodoList) DeleteTodo(ids ...int) error {
 	return nil
 }
 
-func (l *TodoList) DoTodo(ids ...int) error {
+func (l *TodoList) DoTodo(undo bool, ids ...int) error {
 
 	if id, ok := l.ContainsId(ids...); ok {
 		for _, id = range ids {
-			l.Data[id].Done = true
+			l.Data[id].Done = !undo
 		}
 	} else {
 		msg := fmt.Sprintf("Error: found no task with id %d\n", id)
@@ -118,21 +115,5 @@ func (l *TodoList) GetTodoById(id int) *TodoItem {
 	if t, ok := l.Data[id]; ok {
 		return t
 	}
-	return nil
-}
-
-func (l *TodoList) Save(filename string) error {
-	// save todolist
-	var b []byte
-	var err error
-	var f *os.File
-	if b, err = json.Marshal(l); err != nil { return err}
-
-	if f, err = os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644); err != nil { return err}
-
-	defer f.Close()
-
-	if _, err = f.Write(b); err != nil { return err}
-
 	return nil
 }

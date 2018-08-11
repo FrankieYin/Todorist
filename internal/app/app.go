@@ -31,6 +31,7 @@ func init() {
 	todoDir = fmt.Sprintf("%s/.todo/", home)
 	todoJsonFilename = fmt.Sprintf("%stodo", todoDir)
 	archJsonFilename = fmt.Sprintf("%sarchive", todoDir)
+	projJsonFilename = fmt.Sprintf("%sproject", todoDir)
 
 	initTodoEnv()
 	todoList, err = loadTodo(todoJsonFilename)
@@ -60,6 +61,7 @@ func Run() {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			os.Exit(0)
 		} else {
+			fmt.Println(err)
 			os.Exit(1)
 		}
 	}

@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-		)
+	)
 
 type ArchCommand struct {
 }
@@ -31,8 +31,8 @@ func (cmd *ArchCommand) Execute(args []string) error {
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("Archived %d %s\n", n, msg)
 
-	if err = todoList.Save(todoJsonFilename); err != nil { return err }
-	if err = archList.Save(archJsonFilename); err != nil { return err }
+	if err = save(todoList, todoJsonFilename); err != nil { return err }
+	if err = save(archList, archJsonFilename); err != nil { return err }
 
 	return nil
 }

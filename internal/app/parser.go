@@ -22,6 +22,14 @@ func parseId(input []string) []int {
 	return ids
 }
 
+func reverseId(ids ...int) []string {
+	args := make([]string, len(ids))
+	for i, id := range ids {
+		args[i] = strconv.Itoa(id)
+	}
+	return args
+}
+
 /**
  the principle is to assign the smallest available id the a newly created task
  */

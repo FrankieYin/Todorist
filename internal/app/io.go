@@ -8,7 +8,7 @@ import (
 
 	"github.com/FrankieYin/todo/internal/util"
 	"github.com/FrankieYin/todo/internal/data"
-)
+	)
 
 func initTodoEnv() {
 	if _, err := os.Stat(todoDir); os.IsNotExist(err) {
@@ -21,6 +21,9 @@ func initTodoEnv() {
 		util.CheckErr(err, "failed to create json file")
 
 		_, err = os.Create(archJsonFilename)
+		util.CheckErr(err, "failed to create json file")
+
+		_, err = os.Create(projJsonFilename)
 		util.CheckErr(err, "failed to create json file")
 	}
 }
@@ -56,4 +59,19 @@ func loadProject(filename string) (*data.ProjectList, error){
 	if err = json.Unmarshal(b, proj); err != nil {return nil, err}
 
 	return proj, nil
+}
+
+func save(v interface{}, filename string) error {
+	var b []byte
+	var err error
+	var f *os.File
+	if b, err = json.Marshal(v); err != nil { return err}
+
+	if f, err = os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644); err != nil { return err}
+
+	defer f.Close()
+
+	if _, err = f.Write(b); err != nil { return err}
+
+	return nil
 }

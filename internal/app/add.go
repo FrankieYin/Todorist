@@ -3,10 +3,11 @@ package app
 import (
 	"fmt"
 	"os"
-)
+	)
 
 type AddCommand struct {
-	Complete bool `short:"c" description:"Add and immediately complete a task"`
+	Done bool `short:"c" description:"Add and immediately complete a task."`
+	Archive bool `short:"a" description:"Add and immediately archive a task."`
 }
 
 var add AddCommand
@@ -26,6 +27,9 @@ func (cmd *AddCommand) Execute(args []string) error {
 	}
 
 	pTodoItem := parseTodo(args)
+	pTodoItem.Done = add.Done
 	todoList.AddTodo(pTodoItem)
-	return todoList.Save(todoJsonFilename)
+	if add.Archive { return arch.Execute(reverseId(pTodoItem.Id))}
+
+	return save(todoList, todoJsonFilename)
 }
