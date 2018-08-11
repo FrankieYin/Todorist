@@ -8,7 +8,7 @@ import (
 type DelCommand struct {
 }
 
-var del ArchCommand
+var del DelCommand
 
 func init() {
 	parser.AddCommand("del",

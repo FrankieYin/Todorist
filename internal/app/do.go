@@ -5,31 +5,31 @@ import (
 	"os"
 	)
 
-type DoneCommand struct {
+type DoCommand struct {
 	All bool `long:"all" description:"Complete all todos under the current focus."`
 	Undone bool `short:"u" long:"undo" description:"Uncomplete todos specified by the ids"`
 }
 
-var done DoneCommand
+var do DoCommand
 
 func init() {
-	parser.AddCommand("done",
+	parser.AddCommand("do",
 		"Complete todos specified by the ids.",
-		"Complete todos specified by the ids. Use 'todo help done' to see more options",
-		&done)
+		"Complete todos specified by the ids. Use 'todo help do' to see more options",
+		&do)
 }
 
-func (cmd *DoneCommand) Execute(args []string) error {
+func (cmd *DoCommand) Execute(args []string) error {
 	n := len(args)
 	if n == 0 {
 		fmt.Println("No task Id specified, no task completed.")
-		fmt.Println("try 'todo help done' to see examples on how to complete a task")
+		fmt.Println("try 'todo help do' to see examples on how to complete a task")
 		os.Exit(0)
 	}
 
 	ids := parseId(args)
 
-	if err := todoList.DoneTodo(ids...); err != nil {return err}
+	if err := todoList.DoTodo(ids...); err != nil {return err}
 
 	msg := "task"
 	if n > 1 {msg = "tasks"}

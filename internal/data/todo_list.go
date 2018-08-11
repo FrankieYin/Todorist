@@ -73,7 +73,7 @@ func (l *TodoList) DeleteTodo(ids ...int) error {
 	return nil
 }
 
-func (l *TodoList) DoneTodo(ids ...int) error {
+func (l *TodoList) DoTodo(ids ...int) error {
 
 	if id, ok := l.ContainsId(ids...); ok {
 		for _, id = range ids {

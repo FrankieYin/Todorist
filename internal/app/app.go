@@ -8,7 +8,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/mitchellh/go-homedir"
 	"github.com/FrankieYin/todo/internal/util"
-)
+	)
 
 var home string
 var todoDir string
@@ -37,8 +37,26 @@ func init() {
 	util.CheckErr(err, "")
 }
 
+func notACommand(s string) bool {
+	cmdList := []string{"add", "arch", "del", "do", "ls", "proj"}
+	for _, v := range cmdList {
+		if s == v {
+			return false
+		}
+	}
+	return true
+}
+
 func Run() {
-	if _, err := parser.Parse(); err != nil {
+	input := os.Args[1:]
+	if opt := input[0]; notACommand(opt) {
+		input = append(input, "")
+		copy(input[1:], input[0:])
+		input[0] = "add"
+	}
+
+	_, err := parser.ParseArgs(input)
+	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			os.Exit(0)
 		} else {
