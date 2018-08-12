@@ -1,9 +1,7 @@
 package data
 
 import (
-	"fmt"
-
-	"github.com/FrankieYin/todo/internal/util"
+		"github.com/FrankieYin/todo/internal/util"
 )
 
 type ProjectList struct {
@@ -11,7 +9,8 @@ type ProjectList struct {
 }
 
 func NewProjectList() *ProjectList {
-	var projects = make([]*Project, 0)
+	var projects = make([]*Project, 1)
+	projects[0] = &Project{Name:"Inbox"}
 	return &ProjectList{Projects: projects}
 }
 
@@ -20,8 +19,7 @@ func (l *ProjectList) DeleteProject(name string) error {
 		l.Projects = append(l.Projects[:i], l.Projects[i+1:]...)
 		return nil
 	}
-	msg := fmt.Sprintf("Project %s does not exist.", name)
-	return util.ProjectNotFound{Msg:msg}
+	return util.ProjectNotFound{Name:name}
 }
 
 func (l *ProjectList) RenameProject(oldName, newName string) error {
@@ -29,8 +27,7 @@ func (l *ProjectList) RenameProject(oldName, newName string) error {
 		p.Name = newName
 		return nil
 	}
-	msg := fmt.Sprintf("Project %s does not exist.", oldName)
-	return util.ProjectNotFound{Msg:msg}
+	return util.ProjectNotFound{Name:oldName}
 }
 
 func (l *ProjectList) IndexOfProject(name string) int {
@@ -41,6 +38,11 @@ func (l *ProjectList) IndexOfProject(name string) int {
 	}
 	return -1
 }
+
+func (l *ProjectList) ContainsProject(name string) bool {
+	return l.IndexOfProject(name) != -1
+}
+
 func (l *ProjectList) GetProject(name string) *Project {
 	for _, p := range l.Projects {
 		if p.Name == name {
@@ -49,6 +51,7 @@ func (l *ProjectList) GetProject(name string) *Project {
 	}
 	return nil
 }
+
 func (l *ProjectList) AddProject(project *Project) {
 	l.Projects = append(l.Projects, project)
 }

@@ -10,7 +10,7 @@ type InvalidIdError struct {
 }
 
 type ProjectNotFound struct {
-	Msg string
+	Name string
 }
 
 type TooManyArguments struct {
@@ -21,12 +21,17 @@ type NotEnoughArguments struct {
 	Msg string
 }
 
+type InvalidArgument struct {
+	Msg string
+}
+
 func (e InvalidIdError) Error() string {
 	return e.Msg
 }
 
 func (e ProjectNotFound) Error() string {
-	return e.Msg
+	msg := fmt.Sprintf("Project %s does not exist.\n", e.Name)
+	return msg
 }
 
 func (e TooManyArguments) Error() string {
@@ -34,6 +39,10 @@ func (e TooManyArguments) Error() string {
 }
 
 func (e NotEnoughArguments) Error() string {
+	return e.Msg
+}
+
+func (e InvalidArgument) Error() string {
 	return e.Msg
 }
 

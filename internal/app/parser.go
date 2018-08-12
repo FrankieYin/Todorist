@@ -8,8 +8,25 @@ import (
 	"github.com/FrankieYin/todo/internal/util"
 )
 
-func parseTodo(input []string) *data.TodoItem {
-	return &data.TodoItem{Task: strings.Join(input, " "), Id: assignId()}
+/**
+ Usage for adding project
+ research: finish building the PermissionFlowGraph class
+ todolist: add support for parsing project names
+ */
+func parseTodo(input []string) (*data.TodoItem, error) {
+	project := ""
+	if arg := input[0]; arg[len(arg)-1] == ':' { // a project is associated with the new task
+		if project = arg[:len(arg)-1]; project == "" {
+			return nil, util.InvalidArgument{Msg:"project name not specified."}
+		}
+		if !projList.ContainsProject(project) {
+			return nil, util.ProjectNotFound{Name:project}
+		}
+	}
+
+	return &data.TodoItem{Task: strings.Join(input, " "),
+						  Id: assignId(),
+	 					  Project:project}, nil
 }
 
 func parseId(input []string) []int {

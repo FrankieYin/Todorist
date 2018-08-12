@@ -3,10 +3,12 @@ package app
 import (
 	"fmt"
 	"os"
+	"github.com/FrankieYin/todo/internal/data"
 )
 
 type LsCommand struct {
 	Verbose []bool `short:"v" long:"verbose" description:"Print the time at which a todo was added as well."`
+	Project bool `short:"p" description:"List and group the todos into their projects. Todos with no project will be put into 'Inbox'."`
 }
 
 var ls LsCommand
@@ -25,8 +27,20 @@ func (cmd *LsCommand) Execute(args []string) error {
 		os.Exit(0)
 	}
 
-	fmt.Println("All")
-	for _, v := range todoList.Order {
+	if ls.Project {
+		for _, p := range projList.Projects {
+			listTodos(p)
+		}
+		return nil
+	}
+
+	listTodos(projList.Projects[0])
+	return nil
+}
+
+func listTodos(p *data.Project) {
+	fmt.Println(p.Name)
+	for _, v := range p.Todos {
 		pTodo, ok := todoList.Data[v]
 		if ok {
 			done := " "
@@ -34,6 +48,6 @@ func (cmd *LsCommand) Execute(args []string) error {
 			fmt.Printf("%d\t[%s]\t%s\n", pTodo.Id, done, pTodo.Task)
 		}
 	}
-	return nil
+	fmt.Println("")
 }
 

@@ -36,6 +36,8 @@ func init() {
 	initTodoEnv()
 	todoList, err = loadTodo(todoJsonFilename)
 	util.CheckErr(err, "")
+	projList, err = loadProject(projJsonFilename)
+	util.CheckErr(err, "")
 }
 
 func notACommand(s string) bool {
@@ -61,7 +63,6 @@ func Run() {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			os.Exit(0)
 		} else {
-			fmt.Println(err)
 			os.Exit(1)
 		}
 	}

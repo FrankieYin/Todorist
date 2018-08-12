@@ -26,10 +26,15 @@ func (cmd *AddCommand) Execute(args []string) error {
 		os.Exit(0)
 	}
 
-	pTodoItem := parseTodo(args)
+	pTodoItem, err := parseTodo(args)
+	if err != nil {return err}
 	pTodoItem.Done = add.Done
 	todoList.AddTodo(pTodoItem)
+	if name := pTodoItem.Project; name != "" {
+		projList.GetProject(name).AddTodo(pTodoItem.Id)
+	}
 	if add.Archive { return arch.Execute(reverseId(pTodoItem.Id))}
 
-	return save(todoList, todoJsonFilename)
+	if err = save(todoList, todoJsonFilename); err != nil {return err}
+	return save(projList, projJsonFilename)
 }

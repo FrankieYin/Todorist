@@ -24,19 +24,15 @@ func init() {
 }
 
 func (cmd *ProjCommand) Execute(args []string) error {
-	var err error
-	projList, err = loadProject(projJsonFilename)
-	if err != nil {return err}
-
 	n := len(args)
 	if n == 0 { // list existing projects
-		if len(projList.Projects) == 0 {
+		if len(projList.Projects) == 1 {
 			fmt.Println("No existing project found.")
 			fmt.Println("Use 'todo proj [-n <description>] <name>' to create a new project.")
 			os.Exit(0)
 		}
 
-		for _, proj := range projList.Projects {
+		for _, proj := range projList.Projects[1:] { // skip Inbox default project
 			asterisk := " "
 			if proj.OnFocus {
 				asterisk = "*"
@@ -61,9 +57,9 @@ func (cmd *ProjCommand) Execute(args []string) error {
 
 	// create a new project
 	var p *data.Project
-	if proj.Note { // usage: proj [-n <description>] <name>
+	if proj.Note { // usage: proj <name> [-n <description>]
 		if n < 2 {return util.NotEnoughArguments{Msg:"fatal: proj -n operation needs 2 arguments, 1 given"}}
-		if n > 2 {return util.TooManyArguments{Msg:"fatal: too many arguments for creating a project"}}
+		if n > 2 {return util.TooManyArguments{Msg:"fatal: too many arguments for creating a project\nDid you enclose the description in a \"\" ?"}}
 		p = &data.Project{Name:args[1], Description:args[0]}
 	} else {
 		p = &data.Project{Name:args[0]}
