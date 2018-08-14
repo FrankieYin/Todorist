@@ -28,6 +28,10 @@ func (cmd *DelCommand) Execute(args []string) error {
 	ids := parseId(args)
 
 	if err := todoList.DeleteTodo(ids...); err != nil { return err}
+	for _, id := range ids {
+		pTodo := todoList.Data[id]
+		projList.GetProject(pTodo.Project).DeleteTodo(pTodo.Id)
+	}
 
 	msg := "task"
 	if n > 1 {msg = "tasks"}

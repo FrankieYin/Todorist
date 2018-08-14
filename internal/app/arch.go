@@ -26,6 +26,11 @@ func (cmd *ArchCommand) Execute(args []string) error {
 	if err != nil {return err}
 	archList.Merge(archived)
 
+	// delete from their corresponding project
+	for _, pTodo := range archived.Data {
+		projList.GetProject(pTodo.Project).DeleteTodo(pTodo.Id)
+	}
+
 	msg := "task"
 	n := len(archived.Data)
 	if n > 1 {msg = "tasks"}
@@ -33,6 +38,7 @@ func (cmd *ArchCommand) Execute(args []string) error {
 
 	if err = save(todoList, todoJsonFilename); err != nil { return err }
 	if err = save(archList, archJsonFilename); err != nil { return err }
+	if err = save(projList, projJsonFilename); err != nil { return err }
 
 	return nil
 }

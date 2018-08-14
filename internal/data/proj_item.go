@@ -13,3 +13,20 @@ type Project struct {
 func (p *Project) AddTodo(ids ...int) {
 	p.Todos = append(p.Todos, ids...)
 }
+
+func (p *Project) DeleteTodo(ids ...int) {
+	for _, id := range ids {
+		if i := p.IndexOfTodo(id); i != -1 {
+			p.Todos = append(p.Todos[:i], p.Todos[i+1:]...)
+		}
+	}
+}
+
+func (p *Project) IndexOfTodo(id int) int {
+	for i, t := range p.Todos {
+		if t == id {
+			return i
+		}
+	}
+	return -1
+}
