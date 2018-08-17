@@ -3,7 +3,8 @@ package app
 import (
 	"fmt"
 	"os"
-	)
+	"github.com/FrankieYin/todo/internal/data"
+)
 
 type AddCommand struct {
 	Done bool `short:"c" description:"Add and immediately complete a task."`
@@ -30,10 +31,10 @@ func (cmd *AddCommand) Execute(args []string) error {
 	if err != nil {return err}
 
 	pTodoItem.Done = add.Done
-	todoList.AddTodo(pTodoItem)
-	projList.GetProject(pTodoItem.Project).AddTodo(pTodoItem.Id)
+	data.Todos.AddTodo(pTodoItem)
+	data.ProjList.GetProject(pTodoItem.Project).AddTodo(pTodoItem.Id)
 	if add.Archive { return arch.Execute(reverseId(pTodoItem.Id))}
 
-	if err = save(todoList, todoJsonFilename); err != nil {return err}
-	return save(projList, projJsonFilename)
+	if err = save(data.Todos, todoJsonFilename); err != nil {return err}
+	return save(data.ProjList, projJsonFilename)
 }

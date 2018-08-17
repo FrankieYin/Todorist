@@ -12,6 +12,7 @@ type ProjCommand struct {
 	Verbose []bool `short:"v" long:"verbose"`
 	Note bool `short:"n" description:"Add a description to the project."`
 	Delete bool `short:"d" description:"Delete a project specified by the <name>."`
+	SetFocus bool `long:"set-focus"`
 }
 
 var proj ProjCommand
@@ -26,13 +27,13 @@ func init() {
 func (cmd *ProjCommand) Execute(args []string) error {
 	n := len(args)
 	if n == 0 { // list existing projects
-		if len(projList.Projects) == 1 {
+		if len(data.ProjList.Projects) == 0 {
 			fmt.Println("No existing project found.")
 			fmt.Println("Use 'todo proj [-n <description>] <name>' to create a new project.")
 			os.Exit(0)
 		}
 
-		for _, proj := range projList.Projects[1:] { // skip Inbox default project
+		for _, proj := range data.ProjList.Projects { // skip Inbox default project
 			asterisk := " "
 			if proj.OnFocus {
 				asterisk = "*"
@@ -44,26 +45,26 @@ func (cmd *ProjCommand) Execute(args []string) error {
 
 	if proj.Delete { // usage: proj -d <project_name>
 		if n > 1 {return util.TooManyArguments{Msg:"fatal: too many arguments for a delete operation"}}
-		projList.DeleteProject(args[0])
-		return save(projList, projJsonFilename)
+		data.ProjList.DeleteProject(args[0])
+		return save(data.ProjList, projJsonFilename)
 	}
 
 	if proj.Rename { // usage: proj -m <old_name> <new_name>
 		if n < 2 {return util.NotEnoughArguments{Msg:"fatal: rename operation needs 2 arguments, 1 given"}}
 		if n > 2 {return util.TooManyArguments{Msg:"fatal: too many arguments for a rename operation"}}
-		projList.RenameProject(args[0], args[1])
-		return save(projList, projJsonFilename)
+		data.ProjList.RenameProject(args[0], args[1])
+		return save(data.ProjList, projJsonFilename)
 	}
 
 	// create a new project
 	var p *data.Project
-	if proj.Note { // usage: proj <name> [-n <description>]
+	if proj.Note { // usage: proj [--set-focus] <name> [-n <description>]
 		if n < 2 {return util.NotEnoughArguments{Msg:"fatal: proj -n operation needs 2 arguments, 1 given"}}
 		if n > 2 {return util.TooManyArguments{Msg:"fatal: too many arguments for creating a project\nDid you enclose the description in a \"\" ?"}}
-		p = &data.Project{Name:args[1], Description:args[0]}
+		p = &data.Project{Name:args[0], Description:args[1]}
 	} else {
 		p = &data.Project{Name:args[0]}
 	}
-	projList.AddProject(p)
-	return save(projList, projJsonFilename)
+	data.ProjList.AddProject(p)
+	return save(data.ProjList, projJsonFilename)
 }

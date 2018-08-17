@@ -2,7 +2,8 @@ package app
 
 import (
 	"fmt"
-	)
+	"github.com/FrankieYin/todo/internal/data"
+)
 
 type ArchCommand struct {
 }
@@ -18,27 +19,20 @@ func init() {
 
 func (cmd *ArchCommand) Execute(args []string) error {
 	var err error
-	archList, err = loadTodo(archJsonFilename)
+	data.ArchList, err = loadTodo(archJsonFilename)
 	if err != nil {return err}
 
 	ids := parseId(args)
-	archived, err := todoList.ArchTodo(len(archList.Data), ids...)
-	if err != nil {return err}
-	archList.Merge(archived)
-
-	// delete from their corresponding project
-	for _, pTodo := range archived.Data {
-		projList.GetProject(pTodo.Project).DeleteTodo(pTodo.Id)
-	}
+	if err = data.Todos.ArchTodo(ids...); err != nil {return err}
 
 	msg := "task"
-	n := len(archived.Data)
+	n := len(ids)
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("Archived %d %s\n", n, msg)
 
-	if err = save(todoList, todoJsonFilename); err != nil { return err }
-	if err = save(archList, archJsonFilename); err != nil { return err }
-	if err = save(projList, projJsonFilename); err != nil { return err }
+	if err = save(data.Todos, todoJsonFilename); err != nil { return err }
+	if err = save(data.ArchList, archJsonFilename); err != nil { return err }
+	if err = save(data.ProjList, projJsonFilename); err != nil { return err }
 
 	return nil
 }

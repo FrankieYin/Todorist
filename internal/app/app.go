@@ -4,22 +4,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/FrankieYin/todo/internal/data"
 	"github.com/jessevdk/go-flags"
 	"github.com/mitchellh/go-homedir"
 	"github.com/FrankieYin/todo/internal/util"
-	)
+	"github.com/FrankieYin/todo/internal/data"
+)
 
 var home string
 var todoDir string
 var todoJsonFilename string
 var archJsonFilename string
 var projJsonFilename string
-
-var todoList *data.TodoList
-var archList *data.TodoList
-
-var projList *data.ProjectList
 
 var parser = flags.NewParser(nil, flags.Default)
 
@@ -34,9 +29,9 @@ func init() {
 	projJsonFilename = fmt.Sprintf("%sproject", todoDir)
 
 	initTodoEnv()
-	todoList, err = loadTodo(todoJsonFilename)
+	data.Todos, err = loadTodo(todoJsonFilename)
 	util.CheckErr(err, "")
-	projList, err = loadProject(projJsonFilename)
+	data.ProjList, err = loadProject(projJsonFilename)
 	util.CheckErr(err, "")
 }
 

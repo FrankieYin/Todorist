@@ -19,9 +19,10 @@ func parseTodo(input []string) (*data.TodoItem, error) {
 		if project = arg[:len(arg)-1]; project == "" {
 			return nil, util.InvalidArgument{Msg:"project name not specified."}
 		}
-		if !projList.ContainsProject(project) {
+		if !data.ProjList.ContainsProject(project) {
 			return nil, util.ProjectNotFound{Name:project}
 		}
+		input = input[1:]
 	}
 
 	return &data.TodoItem{Task: strings.Join(input, " "),
@@ -52,17 +53,17 @@ func reverseId(ids ...int) []string {
  */
 func assignId() int {
 
-	if len(todoList.Data) == 0 {
+	if len(data.Todos.Data) == 0 {
 		return 1
 	}
 
 	ids := make(map[int]bool)
-	for k := range todoList.Data {
+	for k := range data.Todos.Data {
 		ids[k] = true
 	}
 
 	var i int
-	for i = range todoList.Order {
+	for i = range data.Todos.Order {
 		_, ok := ids[i+1]
 		if !ok {
 			return i+1

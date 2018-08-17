@@ -16,17 +16,19 @@ func NewTodoList() *TodoList {
 	return &TodoList{Data: data, Order: order}
 }
 
-func (l *TodoList) ArchTodo(n int, ids ...int) (*TodoList, error) {
+func (l *TodoList) ArchTodo(ids ...int) error {
 
-	archived := NewTodoList()
+	n := len(ArchList.Data)
 
 	if len(ids) == 0 { // archive all the tasks done
-		for k, pTodo := range l.Data {
+		for id, pTodo := range l.Data {
 			if pTodo.Done {
-				ids = append(ids, k)
+				ids = append(ids, id)
 				n++
 				pTodo.ArchId = n
-				archived.Data[n] = pTodo
+				ArchList.Data[n] = pTodo
+				// delete from their corresponding project
+				ProjList.GetProject(pTodo.Project).DeleteTodo(id)
 			}
 		}
 	} else {
@@ -35,18 +37,18 @@ func (l *TodoList) ArchTodo(n int, ids ...int) (*TodoList, error) {
 				pTodo := l.Data[id]
 				n++
 				pTodo.ArchId = n
-				archived.Data[n] = pTodo
+				ArchList.Data[n] = pTodo
+				// delete from their corresponding project
+				ProjList.GetProject(pTodo.Project).DeleteTodo(id)
 			}
 		} else {
 			msg := fmt.Sprintf("Error: found no task with id %d\n", id)
-			return nil, util.InvalidIdError{Msg: msg}
+			return util.InvalidIdError{Msg: msg}
 		}
 	}
 
 	// we have stored the archived todos; now delete them
-	err := l.DeleteTodo(ids...)
-
-	return archived, err
+	return l.DeleteTodo(ids...)
 }
 
 func (l *TodoList) AddTodo(pTodo *TodoItem) {

@@ -3,7 +3,8 @@ package app
 import (
 	"fmt"
 	"os"
-	)
+	"github.com/FrankieYin/todo/internal/data"
+)
 
 type DoCommand struct {
 	All     bool `long:"all" description:"Complete all todos under the current focus."`
@@ -24,7 +25,7 @@ func (cmd *DoCommand) Execute(args []string) error {
 
 	var ids []int
 	if do.All {
-		ids = todoList.Order
+		ids = data.Todos.Order
 	} else {
 		ids = parseId(args)
 	}
@@ -39,10 +40,10 @@ func (cmd *DoCommand) Execute(args []string) error {
 	var err error
 	undo := "Completed"
 	if do.Undo {
-		err = todoList.DoTodo(true, ids...)
+		err = data.Todos.DoTodo(true, ids...)
 		undo = "Un-completed"
 	} else {
-		err = todoList.DoTodo(false, ids...)
+		err = data.Todos.DoTodo(false, ids...)
 	}
 	if err != nil {return err}
 
@@ -52,5 +53,5 @@ func (cmd *DoCommand) Execute(args []string) error {
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("%s %d %s\n", undo, n, msg)
 
-	return save(todoList, todoJsonFilename)
+	return save(data.Todos, todoJsonFilename)
 }

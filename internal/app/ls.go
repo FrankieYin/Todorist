@@ -8,7 +8,8 @@ import (
 
 type LsCommand struct {
 	Verbose []bool `short:"v" long:"verbose" description:"Print the time at which a todo was added as well."`
-	Project bool `short:"p" description:"List and group the todos into their projects. Todos with no project will be put into 'Inbox'."`
+	Project string `short:"p" long:"project" optional:"true" default:"true" description:"List and group the todos into their projects. Todos with no project will be put into 'Inbox'."`
+	InboxOnly bool `short:"x"`
 }
 
 var ls LsCommand
@@ -21,33 +22,66 @@ func init() {
 }
 
 func (cmd *LsCommand) Execute(args []string) error {
-	if len(todoList.Data) == 0 {
+	if len(data.Todos.Data) == 0 {
 		fmt.Println("No todo left undone!")
 		fmt.Println("Use 'todo add' to add a new task.")
 		os.Exit(0)
 	}
 
-	if ls.Project {
-		for _, p := range projList.Projects {
-			listTodos(p)
+	currentFocus := data.ProjList.GetFocused()
+
+	if len(currentFocus) != 0 { // list only the todos in current focus
+		for _, p := range currentFocus {
+			listProject(p, false)
 		}
 		return nil
 	}
 
-	listTodos(projList.Projects[0])
+	listAll(ls.InboxOnly)
+
+	if ls.Project == "true" {
+		for _, p := range data.ProjList.Projects {
+			listProject(p, false)
+		}
+		return nil
+	}
+
 	return nil
 }
 
-func listTodos(p *data.Project) {
+func listProject(p *data.Project, showProject bool) {
 	fmt.Println(p.Name)
-	for _, v := range p.Todos {
-		pTodo, ok := todoList.Data[v]
+	listTodos(p.Todos, false)
+}
+
+func listTodos(ids []int, showProject bool) {
+	for _, id := range ids {
+		pTodo, ok := data.Todos.Data[id]
 		if ok {
 			done := " "
+			projectName := ""
 			if pTodo.Done {done = "X"}
-			fmt.Printf("%d\t[%s]\t%s\n", pTodo.Id, done, pTodo.Task)
+			if showProject {projectName = fmt.Sprintf("%s: ", pTodo.Project)}
+			fmt.Printf("%d\t[%s]\t%s%s\n", pTodo.Id, done, projectName, pTodo.Task)
 		}
 	}
 	fmt.Println("")
+}
+
+func listAll(inboxOnly bool) {
+	fmt.Println("Inbox")
+	var inboxList []int
+	if inboxOnly {
+		inboxList = make([]int, 0)
+		for _, id := range data.Todos.Order {
+			if pTodo := data.Todos.Data[id]; pTodo.Project == "" {
+				inboxList = append(inboxList, id)
+			}
+		}
+	} else {
+		inboxList = data.Todos.Order
+	}
+
+	listTodos(inboxList, true)
 }
 
