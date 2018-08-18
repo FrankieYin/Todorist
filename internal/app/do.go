@@ -24,15 +24,18 @@ func init() {
 func (cmd *DoCommand) Execute(args []string) error {
 
 	var ids []int
+	currentFocus := data.ProjList.GetFocused()
 	if do.All {
-		ids = data.Todos.Order
+		for _, p := range currentFocus {
+			ids = append(ids, p.Todos...)
+		}
 	} else {
 		ids = parseId(args)
 	}
 
 	n := len(ids)
 	if n == 0 {
-		fmt.Println("No task Id specified, no task completed.")
+		fmt.Println("No task Id specified under current focus, no task completed.")
 		fmt.Println("try 'todo help do' to see examples on how to complete a task")
 		os.Exit(0)
 	}

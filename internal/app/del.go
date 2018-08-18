@@ -27,16 +27,12 @@ func (cmd *DelCommand) Execute(args []string) error {
 	}
 
 	ids := parseId(args)
-
 	if err := data.Todos.DeleteTodo(ids...); err != nil { return err}
-	for _, id := range ids {
-		pTodo := data.Todos.Data[id]
-		data.ProjList.GetProject(pTodo.Project).DeleteTodo(pTodo.Id)
-	}
 
 	msg := "task"
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("Deleted %d %s\n", n, msg)
 
-	return save(data.Todos, todoJsonFilename)
+	if err := save(data.Todos, todoJsonFilename); err != nil {return err}
+	return save(data.ProjList, projJsonFilename)
 }

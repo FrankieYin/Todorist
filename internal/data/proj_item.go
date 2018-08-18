@@ -30,3 +30,7 @@ func (p *Project) IndexOfTodo(id int) int {
 	}
 	return -1
 }
+
+func (p *Project) ChangeFocus() {
+	p.OnFocus = !p.OnFocus
+}

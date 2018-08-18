@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/FrankieYin/todo/internal/data"
-)
+	)
 
 type LsCommand struct {
 	Verbose []bool `short:"v" long:"verbose" description:"Print the time at which a todo was added as well."`
@@ -56,14 +56,18 @@ func listProject(p *data.Project, showProject bool) {
 
 func listTodos(ids []int, showProject bool) {
 	for _, id := range ids {
-		pTodo, ok := data.Todos.Data[id]
-		if ok {
-			done := " "
-			projectName := ""
-			if pTodo.Done {done = "X"}
-			if showProject {projectName = fmt.Sprintf("%s: ", pTodo.Project)}
-			fmt.Printf("%d\t[%s]\t%s%s\n", pTodo.Id, done, projectName, pTodo.Task)
+		pTodo := data.Todos.Data[id]
+		done := " "
+		projectName := ""
+		if pTodo.Done {
+			done = "X"
 		}
+		if showProject {
+			if !(pTodo.Project == "") {
+				projectName = fmt.Sprintf("%s: ", pTodo.Project)
+			}
+		}
+		fmt.Printf("%d\t[%s]\t%s%s\n", pTodo.Id, done, projectName, pTodo.Task)
 	}
 	fmt.Println("")
 }

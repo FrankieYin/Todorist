@@ -25,6 +25,20 @@ type InvalidArgument struct {
 	Msg string
 }
 
+type InvalidPriorityLevel struct {
+	Level int
+}
+
+func (e InvalidPriorityLevel) Error() string {
+	msg := fmt.Sprintf("Does not have a priority level %d.\n " +
+		"A general rule of thumbs:\n" +
+		"Use 4 for non-urgent and non-important tasks;\n" +
+		"Use 3 for non-urgent and important tasks;\n" +
+		"Use 2 for urgent and non-important tasks;\n" +
+		"Use 1 for urgent and important tasks.", e.Level)
+	return msg
+}
+
 func (e InvalidIdError) Error() string {
 	return e.Msg
 }

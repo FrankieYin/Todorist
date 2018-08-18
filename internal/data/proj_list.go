@@ -14,7 +14,7 @@ func NewProjectList() *ProjectList {
 }
 
 func (l *ProjectList) DeleteProject(name string) error {
-	if i := l.IndexOfProject(name); i != -1 {
+	if i := l.indexOfProject(name); i != -1 {
 		// delete all todos belonged to this project first
 		Todos.DeleteTodo(l.Projects[i].Todos...)
 		l.Projects = append(l.Projects[:i], l.Projects[i+1:]...)
@@ -31,7 +31,7 @@ func (l *ProjectList) RenameProject(oldName, newName string) error {
 	return util.ProjectNotFound{Name:oldName}
 }
 
-func (l *ProjectList) IndexOfProject(name string) int {
+func (l *ProjectList) indexOfProject(name string) int {
 	for i, p := range l.Projects {
 		if p.Name == name {
 			return i
@@ -41,7 +41,7 @@ func (l *ProjectList) IndexOfProject(name string) int {
 }
 
 func (l *ProjectList) ContainsProject(name string) bool {
-	return l.IndexOfProject(name) != -1
+	return l.indexOfProject(name) != -1
 }
 
 func (l *ProjectList) GetProject(name string) *Project {
@@ -65,4 +65,29 @@ func (l *ProjectList) GetFocused() []*Project {
 		}
 	}
 	return currentFocus
+}
+
+func (l *ProjectList) ChangeFocus(names []string) error {
+	for _, name := range names { // make sure all specified projects exist
+		if !l.ContainsProject(name) {
+			return util.ProjectNotFound{Name: name}
+		}
+	}
+
+	for _, name := range names {
+		l.GetProject(name).ChangeFocus()
+	}
+	return nil
+}
+
+func (l *ProjectList) AddTodo(pTodo *TodoItem) error {
+	if pTodo.Project == "" {return nil}
+	l.GetProject(pTodo.Project).AddTodo(pTodo.Id)
+	return nil
+}
+
+func (l *ProjectList) DeleteTodo(pTodo *TodoItem) error {
+	if pTodo.Project == "" {return nil}
+	l.GetProject(pTodo.Project).DeleteTodo(pTodo.Id)
+	return nil
 }

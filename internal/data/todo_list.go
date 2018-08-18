@@ -28,7 +28,7 @@ func (l *TodoList) ArchTodo(ids ...int) error {
 				pTodo.ArchId = n
 				ArchList.Data[n] = pTodo
 				// delete from their corresponding project
-				ProjList.GetProject(pTodo.Project).DeleteTodo(id)
+				ProjList.DeleteTodo(pTodo)
 			}
 		}
 	} else {
@@ -39,7 +39,7 @@ func (l *TodoList) ArchTodo(ids ...int) error {
 				pTodo.ArchId = n
 				ArchList.Data[n] = pTodo
 				// delete from their corresponding project
-				ProjList.GetProject(pTodo.Project).DeleteTodo(id)
+				ProjList.DeleteTodo(pTodo)
 			}
 		} else {
 			msg := fmt.Sprintf("Error: found no task with id %d\n", id)
@@ -54,14 +54,17 @@ func (l *TodoList) ArchTodo(ids ...int) error {
 func (l *TodoList) AddTodo(pTodo *TodoItem) {
 	l.Data[pTodo.Id] = pTodo
 	l.Order = append(l.Order, pTodo.Id)
+	ProjList.AddTodo(pTodo)
 }
 
 func (l *TodoList) DeleteTodo(ids ...int) error {
 	// check all ids are valid
 	if id, ok := l.ContainsId(ids...); ok {
 		for _, id = range ids {
+			pTodo := l.Data[id]
+			ProjList.DeleteTodo(pTodo)
 			delete(l.Data, id)
-			i := l.IndexOf(id)
+			i := l.indexOf(id)
 			l.Order = append(l.Order[:i], l.Order[i+1:]...)
 		}
 	} else {
@@ -104,7 +107,7 @@ func (l *TodoList) ContainsId(ids ...int) (int, bool) {
 	return -1, true
 }
 
-func (l *TodoList) IndexOf(id int) int {
+func (l *TodoList) indexOf(id int) int {
 	for i, v := range l.Order {
 		if v == id {
 			return i
