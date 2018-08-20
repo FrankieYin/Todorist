@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 	"github.com/FrankieYin/todo/internal/data"
-	)
+	"time"
+)
 
 type LsCommand struct {
 	Verbose []bool `short:"v" long:"verbose" description:"Print the time at which a todo was added as well."`
@@ -67,7 +68,13 @@ func listTodos(ids []int, showProject bool) {
 				projectName = fmt.Sprintf("%s: ", pTodo.Project)
 			}
 		}
-		fmt.Printf("%d\t[%s]\t%s%s\n", pTodo.Id, done, projectName, pTodo.Task)
+
+		// show due date
+		now := time.Now()
+		today := time.Date(now.Year(), now.Month(), now.Day(), 0,0,0,0, now.Location())
+		due := pTodo.Due
+		dueDate := getDueString(today, due)
+		fmt.Printf("%d\t[%s]   %-10s\t%s%s\n", pTodo.Id, done, dueDate, projectName, pTodo.Task)
 	}
 	fmt.Println("")
 }
@@ -87,5 +94,17 @@ func listAll(inboxOnly bool) {
 	}
 
 	listTodos(inboxList, true)
+}
+
+func getDueString(today time.Time, due time.Time) string {
+	switch h := due.Sub(today).Hours(); h {
+	case float64(-24), float64(0):
+		return "Yesterday"
+	case float64(24):
+		return "Today"
+	case float64(48):
+		return "Tomorrow"
+	}
+	return due.Add(-time.Second).Format("Mon, Jan 2")
 }
 
