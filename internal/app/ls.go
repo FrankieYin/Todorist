@@ -11,6 +11,7 @@ type LsCommand struct {
 	Verbose []bool `short:"v" long:"verbose" description:"Print the time at which a todo was added as well."`
 	Project string `short:"p" long:"project" optional:"true" default:"true" description:"List and group the todos into their projects. Todos with no project will be put into 'Inbox'."`
 	InboxOnly bool `short:"x"`
+	All bool `long:"all" description:"list all todos grouped under projects"`
 }
 
 var ls LsCommand
@@ -32,10 +33,12 @@ func (cmd *LsCommand) Execute(args []string) error {
 	currentFocus := data.ProjList.GetFocused()
 
 	if len(currentFocus) != 0 { // list only the todos in current focus
-		for _, p := range currentFocus {
-			listProject(p, false)
+		if !ls.All {
+			for _, p := range currentFocus {
+				listProject(p, false)
+			}
+			return nil
 		}
-		return nil
 	}
 
 	listAll(ls.InboxOnly)
@@ -97,6 +100,9 @@ func listAll(inboxOnly bool) {
 }
 
 func getDueString(today time.Time, due time.Time) string {
+	if due.Equal(time.Time{}) {
+		return ""
+	}
 	switch h := due.Sub(today).Hours(); h {
 	case float64(-24), float64(0):
 		return "Yesterday"

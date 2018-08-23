@@ -1,6 +1,9 @@
 package data
 
-import "time"
+import (
+	"time"
+	"github.com/FrankieYin/todo/internal/util"
+)
 
 type TodoItem struct {
 	Task string `json:"task"`
@@ -16,4 +19,15 @@ type TodoItem struct {
 
 func (t *TodoItem) IsOverDue() bool {
 	return time.Now().After(t.Due)
+}
+
+
+func (t *TodoItem) ChangeProject(newProj string) error {
+	if p := ProjList.GetProject(newProj); p != nil {
+		p.AddTodo(t.Id)
+		t.Project = newProj
+	} else {
+		return util.ProjectNotFound{Name:newProj}
+	}
+	return nil
 }

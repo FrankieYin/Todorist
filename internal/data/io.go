@@ -1,4 +1,4 @@
-package app
+package data
 
 
 import (
@@ -7,10 +7,26 @@ import (
 	"io/ioutil"
 
 	"github.com/FrankieYin/todo/internal/util"
-	"github.com/FrankieYin/todo/internal/data"
-	)
+	"github.com/mitchellh/go-homedir"
+	"fmt"
+)
 
-func initTodoEnv() {
+var home string
+var todoDir string
+var todoJsonFilename string
+var archJsonFilename string
+var projJsonFilename string
+
+func InitTodoEnv() {
+	var err error
+	home, err = homedir.Dir()
+	util.CheckErr(err, "")
+
+	todoDir = fmt.Sprintf("%s/.todo/", home)
+	todoJsonFilename = fmt.Sprintf("%stodo", todoDir)
+	archJsonFilename = fmt.Sprintf("%sarchive", todoDir)
+	projJsonFilename = fmt.Sprintf("%sproject", todoDir)
+
 	if _, err := os.Stat(todoDir); os.IsNotExist(err) {
 		// create the directory
 		err = os.Mkdir(todoDir, 0777)
@@ -26,19 +42,26 @@ func initTodoEnv() {
 		_, err = os.Create(projJsonFilename)
 		util.CheckErr(err, "failed to create json file")
 	}
+
+	Todos, err = loadTodo(todoJsonFilename)
+	util.CheckErr(err, "")
+	ArchList, err = loadTodo(archJsonFilename)
+	util.CheckErr(err, "")
+	ProjList, err = loadProject(projJsonFilename)
+	util.CheckErr(err, "")
 }
 
 /**
  loads the json string into memory
  */
-func loadTodo(filename string) (*data.TodoList, error){
+func loadTodo(filename string) (*TodoList, error){
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {return nil, err}
 
-	var todos = new(data.TodoList)
+	var todos = new(TodoList)
 
 	if len(b) == 0 { // empty json file
-		return data.NewTodoList(), nil
+		return NewTodoList(), nil
 	}
 
 	if err = json.Unmarshal(b, todos); err != nil {return nil, err}
@@ -46,14 +69,14 @@ func loadTodo(filename string) (*data.TodoList, error){
 	return todos, nil
 }
 
-func loadProject(filename string) (*data.ProjectList, error){
+func loadProject(filename string) (*ProjectList, error){
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {return nil, err}
 
-	var proj = new(data.ProjectList)
+	var proj = new(ProjectList)
 
 	if len(b) == 0 { // empty json file
-		return data.NewProjectList(), nil
+		return NewProjectList(), nil
 	}
 
 	if err = json.Unmarshal(b, proj); err != nil {return nil, err}

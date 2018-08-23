@@ -56,5 +56,5 @@ func (cmd *DoCommand) Execute(args []string) error {
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("%s %d %s\n", undo, n, msg)
 
-	return save(data.Todos, todoJsonFilename)
+	return save()
 }

@@ -1,42 +1,20 @@
 package app
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/mitchellh/go-homedir"
-	"github.com/FrankieYin/todo/internal/util"
-	"github.com/FrankieYin/todo/internal/data"
+		"github.com/FrankieYin/todo/internal/data"
 )
-
-var home string
-var todoDir string
-var todoJsonFilename string
-var archJsonFilename string
-var projJsonFilename string
 
 var parser = flags.NewParser(nil, flags.Default)
 
 func init() {
-	var err error
-	home, err = homedir.Dir()
-	util.CheckErr(err, "")
-
-	todoDir = fmt.Sprintf("%s/.todo/", home)
-	todoJsonFilename = fmt.Sprintf("%stodo", todoDir)
-	archJsonFilename = fmt.Sprintf("%sarchive", todoDir)
-	projJsonFilename = fmt.Sprintf("%sproject", todoDir)
-
-	initTodoEnv()
-	data.Todos, err = loadTodo(todoJsonFilename)
-	util.CheckErr(err, "")
-	data.ProjList, err = loadProject(projJsonFilename)
-	util.CheckErr(err, "")
+	data.InitTodoEnv()
 }
 
 func notACommand(s string) bool {
-	cmdList := []string{"add", "arch", "del", "do", "ls", "proj"}
+	cmdList := []string{"add", "arch", "del", "do", "e", "ls", "proj"}
 	for _, v := range cmdList {
 		if s == v {
 			return false
@@ -61,4 +39,11 @@ func Run() {
 			os.Exit(1)
 		}
 	}
+}
+
+func save() error {
+	var err error
+	if err = data.Todos.Save(); err != nil {return err}
+	if err = data.ArchList.Save(); err != nil {return err}
+	return data.ProjList.Save()
 }

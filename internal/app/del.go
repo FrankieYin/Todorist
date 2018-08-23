@@ -33,6 +33,5 @@ func (cmd *DelCommand) Execute(args []string) error {
 	if n > 1 {msg = "tasks"}
 	fmt.Printf("Deleted %d %s\n", n, msg)
 
-	if err := save(data.Todos, todoJsonFilename); err != nil {return err}
-	return save(data.ProjList, projJsonFilename)
+	return save()
 }

@@ -57,8 +57,7 @@ func (cmd *AddCommand) Execute(args []string) error {
 	data.Todos.AddTodo(pTodoItem)
 	if add.Archive { return arch.Execute(reverseId(pTodoItem.Id))}
 
-	if err = save(data.Todos, todoJsonFilename); err != nil {return err}
-	return save(data.ProjList, projJsonFilename)
+	return save()
 }
 
 func getPriority(level int) data.PriorityLevel {

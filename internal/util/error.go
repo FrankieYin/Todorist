@@ -6,7 +6,7 @@ import (
 )
 
 type InvalidIdError struct {
-	Msg string
+	Id int
 }
 
 type ProjectNotFound struct {
@@ -40,11 +40,12 @@ func (e InvalidPriorityLevel) Error() string {
 }
 
 func (e InvalidIdError) Error() string {
-	return e.Msg
+	msg := fmt.Sprintf("Error: found no task with id %d\n", e.Id)
+	return msg
 }
 
 func (e ProjectNotFound) Error() string {
-	msg := fmt.Sprintf("Project %s does not exist.\n", e.Name)
+	msg := fmt.Sprintf("Project \"%s\" does not exist.\n", e.Name)
 	return msg
 }
 
